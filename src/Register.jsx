@@ -45,11 +45,13 @@ export default function Register() {
 
     if (!file) {
       setIdeaFile(null);
+      setErrors((current) => ({ ...current, ideaFile: 'Idea document is required' }));
       return;
     }
 
     if (!ALLOWED_FILE_TYPES.includes(file.type)) {
       setIdeaFile(null);
+      setErrors((current) => ({ ...current, ideaFile: 'Upload a PDF, DOC, or DOCX file.' }));
       setSubmitError('Upload a PDF, DOC, or DOCX file.');
       event.target.value = '';
       return;
@@ -57,12 +59,14 @@ export default function Register() {
 
     if (file.size > MAX_FILE_SIZE_BYTES) {
       setIdeaFile(null);
+      setErrors((current) => ({ ...current, ideaFile: 'Idea document must be 5 MB or smaller.' }));
       setSubmitError('Idea document must be 5 MB or smaller.');
       event.target.value = '';
       return;
     }
 
     setSubmitError('');
+    setErrors((current) => ({ ...current, ideaFile: '' }));
 
     const reader = new FileReader();
 
@@ -89,6 +93,10 @@ export default function Register() {
         next[field] = 'Required';
       }
     });
+
+    if (!ideaFile) {
+      next.ideaFile = 'Idea document is required';
+    }
 
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       next.email = 'Enter a valid email';
@@ -299,10 +307,10 @@ export default function Register() {
                 error={errors.teamSize}
               />
 
-              <label className="form-field file-field">
+              <label className={`form-field file-field ${errors.ideaFile ? 'has-error' : ''}`}>
                 <span>
                   Idea Discussion Document
-                  <em>[ OPTIONAL · PDF / DOC / DOCX · MAX 5 MB ]</em>
+                  <em>[ REQUIRED · PDF / DOC / DOCX · MAX 5 MB ]</em>
                 </span>
                 <input
                   key={fileInputKey}
@@ -312,6 +320,7 @@ export default function Register() {
                   disabled={isBusy}
                 />
                 {ideaFile && <small className="file-name">Attached: {ideaFile.name}</small>}
+                {errors.ideaFile && <small>{errors.ideaFile}</small>}
               </label>
             </div>
 
